@@ -1,0 +1,9 @@
+{
+  "title": "OronBox",
+  "waiting": "Waiting...",
+  "synced": "Synced",
+  "status_connected": "Connected",
+  "status_waiting": "Waiting for sync",
+  "status_synced": "Sync complete",
+  "status_error": "Error"
+}

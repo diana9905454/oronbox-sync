@@ -1,0 +1,23 @@
+{
+  "name": "vela-oronbox-sync",
+  "version": "1.0.0",
+  "description": "OronBox同步器 - Vela手环端应用，接收字符串并生成二维码展示。支持小米手环9/10/11。",
+  "author": "OronBox Community",
+  "license": "AGPL-3.0",
+  "scripts": {
+    "build": "aiot build",
+    "release": "aiot release",
+    "start": "aiot start",
+    "server": "aiot server",
+    "watch": "aiot watch",
+    "devices": "aiot getConnectedDevices",
+    "platforms": "aiot getPlatforms"
+  },
+  "dependencies": {},
+  "devDependencies": {
+    "aiot-toolkit": "^2.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  }
+}

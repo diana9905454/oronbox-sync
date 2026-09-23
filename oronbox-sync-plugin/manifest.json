@@ -1,0 +1,13 @@
+{
+  "api_level": 1,
+  "id": "org.zxor.oronbox.sync",
+  "name": "OronBox同步器",
+  "version": "2.4.5",
+  "author": "Diana",
+  "description": "输入OronBox配对链接同步到手环，手环展示二维码以便下次方便链接",
+  "website": "https://oronbox.zxor.org",
+  "runtime": "js",
+  "entry": "main.js",
+  "icon": "icon.png",
+  "permissions": ["ui", "device", "interconnect", "file"]
+}

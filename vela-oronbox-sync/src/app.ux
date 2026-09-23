@@ -1,0 +1,57 @@
+<script>
+import interconnect from '@system.interconnect'
+
+// 在 app 层初始化 interconnect，确保连接会话在应用启动时即建立
+// （对齐喵喵电子书 app.ux 的做法，而不是放到页面 onInit 里）
+globalThis.__qrBridge = {
+  text: '',
+  listeners: [],
+  setText(t) {
+    this.text = t
+    for (var i = 0; i < this.listeners.length; i++) {
+      try { this.listeners[i](t) } catch (e) {}
+    }
+  },
+  onChange(fn) { this.listeners.push(fn) },
+}
+
+function extractText(evt) {
+  if (typeof evt === 'string') return evt
+  if (evt && typeof evt === 'object') {
+    if (typeof evt.data === 'string') return evt.data
+    if (evt.data && typeof evt.data === 'object') return JSON.stringify(evt.data)
+    return JSON.stringify(evt)
+  }
+  return ''
+}
+
+function setupConnect() {
+  try {
+    var conn = interconnect.instance()
+    globalThis.__qrBridge.conn = conn
+
+    conn.onmessage = function(evt) {
+      var text = extractText(evt)
+      if (text) {
+        globalThis.__qrBridge.setText(text)
+        // 回执给插件：确认已收到并显示二维码
+        try {
+          conn.send({
+            data: { tag: '__ack__', ok: 1 },
+            success: function() {},
+            fail: function() {},
+          })
+        } catch (e) {}
+      }
+    }
+
+    conn.onopen = function() {}
+    conn.onclose = function() {}
+    conn.onerror = function() {}
+  } catch (e) {}
+}
+
+setupConnect()
+
+export default {}
+</script>

@@ -1,0 +1,29 @@
+{
+  "package": "com.oronbox.sync",
+  "name": "OronBox同步器",
+  "icon": "/common/logo96.png",
+  "versionName": "2.5.0",
+  "versionCode": 28,
+  "minAPILevel": 2,
+  "deviceTypeList": ["watch"],
+  "features": [
+    { "name": "system.interconnect" },
+    { "name": "system.storage" }
+  ],
+  "config": {
+    "designWidth": 212,
+    "logLevel": "debug"
+  },
+  "router": {
+    "entry": "Index",
+    "pages": {
+      "Index": {
+        "component": "index",
+        "path": "/"
+      }
+    }
+  },
+  "display": {
+    "backgroundColor": "#000000"
+  }
+}

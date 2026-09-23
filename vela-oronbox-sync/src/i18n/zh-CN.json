@@ -1,0 +1,9 @@
+{
+  "title": "OronBox",
+  "waiting": "等待中...",
+  "synced": "已同步",
+  "status_connected": "已连接",
+  "status_waiting": "等待同步",
+  "status_synced": "同步成功",
+  "status_error": "错误"
+}

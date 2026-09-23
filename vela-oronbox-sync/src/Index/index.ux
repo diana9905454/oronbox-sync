@@ -1,0 +1,308 @@
+<template>
+  <div class="root">
+    <!-- 二级菜单：更多（MAC 在上、authkey 在下） -->
+    <div class="page" if="{{showDetail}}">
+      <text class="title">更多</text>
+
+      <div class="detail-scroll">
+        <div class="detail-block">
+          <text class="detail-label">MAC</text>
+          <text class="detail-value">{{pairLine1}}</text>
+        </div>
+        <div class="detail-block">
+          <text class="detail-label">authkey</text>
+          <text class="detail-value">{{pairLine2}}</text>
+        </div>
+      </div>
+
+      <div class="back-btn" @click="closeDetail">
+        <text class="back-btn-text">返回</text>
+      </div>
+    </div>
+
+    <!-- 主界面 -->
+    <div class="page" if="{{!showDetail}}">
+      <text class="title">OronBox同步器</text>
+
+      <div class="body">
+        <div class="qrbox" if="{{hasQR}}">
+          <qrcode value="{{qrValue}}" class="qrcode"></qrcode>
+        </div>
+        <text class="placeholder" if="{{!hasQR}}">{{status}}</text>
+      </div>
+
+      <div class="pair-area" if="{{hasQR}}">
+        <div class="detail-btn" @click="openDetail">
+          <text class="detail-btn-text">更多</text>
+        </div>
+      </div>
+    </div>
+  </div>
+</template>
+
+<style>
+.root {
+  width: 100%;
+  height: 100%;
+}
+
+.page {
+  width: 100%;
+  height: 100%;
+  background-color: #000000;
+  flex-direction: column;
+  align-items: center;
+}
+
+.title {
+  margin-top: 16px;
+  font-size: 14px;
+  font-weight: bold;
+  color: #ffffff;
+}
+
+.body {
+  flex: 1;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrbox {
+  background-color: #ffffff;
+  border-radius: 6px;
+  padding: 6px;
+  align-items: center;
+  justify-content: center;
+}
+
+.qrcode {
+  width: 172px;
+  height: 172px;
+  color: #000000;
+}
+
+.placeholder {
+  font-size: 20px;
+  color: #ff9500;
+  text-align: center;
+  font-weight: bold;
+}
+
+.pair-area {
+  width: 100%;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.detail-btn {
+  height: 46px;
+  padding-left: 26px;
+  padding-right: 26px;
+  background-color: #1a1a1a;
+  border-radius: 23px;
+  align-items: center;
+  justify-content: center;
+}
+
+.detail-btn-text {
+  font-size: 15px;
+  color: #4488ff;
+}
+
+.status {
+  font-size: 12px;
+  text-align: center;
+  margin-bottom: 14px;
+  color: #888888;
+}
+
+.detail-scroll {
+  flex: 1;
+  width: 100%;
+  margin-top: 18px;
+  padding-left: 14px;
+  padding-right: 14px;
+  flex-direction: column;
+}
+
+.detail-block {
+  width: 100%;
+  margin-bottom: 20px;
+  flex-direction: column;
+  align-items: center;
+}
+
+.detail-label {
+  font-size: 13px;
+  color: #4488ff;
+  margin-bottom: 6px;
+}
+
+.detail-value {
+  width: 100%;
+  font-size: 14px;
+  color: #ffffff;
+  line-height: 20px;
+  word-break: break-all;
+  text-align: center;
+}
+
+.back-btn {
+  margin-top: 14px;
+  margin-bottom: 20px;
+  height: 46px;
+  padding-left: 26px;
+  padding-right: 26px;
+  background-color: #1a1a1a;
+  border-radius: 23px;
+  align-items: center;
+  justify-content: center;
+}
+
+.back-btn-text {
+  font-size: 15px;
+  color: #4488ff;
+}
+
+/* 矩形屏（小米手环8Pro / 9Pro / Redmi Watch 5 等）略缩小二维码 */
+@media screen and (shape: rect) {
+  .qrcode {
+    width: 148px;
+    height: 148px;
+  }
+  .detail-scroll {
+    padding-left: 8%;
+    padding-right: 8%;
+  }
+}
+
+/* 圆形屏（Xiaomi Watch S 系列等）：四边留安全区、缩小二维码、避让圆角 */
+@media screen and (shape: circle) {
+  .title {
+    margin-top: 10%;
+  }
+  .body {
+    padding-top: 6%;
+    padding-bottom: 8%;
+  }
+  .qrcode {
+    width: 128px;
+    height: 128px;
+  }
+  .pair-area {
+    margin-bottom: 8%;
+  }
+  .detail-scroll {
+    padding-left: 14%;
+    padding-right: 14%;
+    margin-top: 6%;
+  }
+  .back-btn {
+    margin-bottom: 10%;
+  }
+}
+</style>
+
+<script>
+import storage from '@system.storage'
+
+export default {
+  private: {
+    qrValue: '',
+    pairLine1: '',
+    pairLine2: '',
+    hasQR: false,
+    showDetail: false,
+    status: '等待同步...',
+    statusColor: '#888888',
+  },
+
+  onInit() {
+    const self = this
+    if (globalThis.__qrBridge) {
+      globalThis.__qrBridge.onChange(function(t) {
+        self.showQR(t)
+      })
+      if (globalThis.__qrBridge.text) {
+        self.showQR(globalThis.__qrBridge.text)
+      }
+    }
+    this.restoreLast()
+  },
+
+  parsePair(text) {
+    var mac = ''
+    var key = ''
+    try {
+      var m = text.match(/[?&]mac=([^&\s]+)/)
+      if (m) mac = m[1]
+      var a = text.match(/[?&]authkey=([^&\s]+)/)
+      if (a) key = a[1]
+    } catch (e) {}
+    return { mac: mac, key: key }
+  },
+
+  // 将 MAC 格式化为 XX:XX:XX:XX:XX:XX 形式
+  formatMac(raw) {
+    if (!raw) return '-'
+    // 去掉所有非 hex 字符（如冒号、空格、-）
+    var hex = String(raw).replace(/[^0-9a-fA-F]/g, '')
+    // 若不足 12 位，原样返回
+    if (hex.length < 12) return String(raw)
+    // 取后 12 位，两位一组用冒号连接
+    hex = hex.slice(-12)
+    var parts = []
+    for (var i = 0; i < 12; i += 2) {
+      parts.push(hex.substring(i, i + 2))
+    }
+    return parts.join(':')
+  },
+
+  showQR(text) {
+    if (!text) return
+    this.qrValue = text
+    this.hasQR = true
+    var pair = this.parsePair(text)
+    this.pairLine1 = this.formatMac(pair.mac)
+    this.pairLine2 = pair.key ? pair.key : '-'
+    this.status = '已显示二维码'
+    this.statusColor = '#44ff44'
+    try { this.saveLast(text) } catch (e) {}
+  },
+
+  openDetail() {
+    this.showDetail = true
+  },
+
+  closeDetail() {
+    this.showDetail = false
+  },
+
+  saveLast(text) {
+    try {
+      storage.set({
+        key: 'last_qr',
+        value: text,
+        success: function() {},
+        fail: function() {},
+      })
+    } catch (e) {}
+  },
+
+  restoreLast() {
+    const self = this
+    try {
+      storage.get({
+        key: 'last_qr',
+        success: function(data) {
+          if (data && data.length > 0) self.showQR(data)
+        },
+        fail: function() {},
+      })
+    } catch (e) {}
+  },
+}
+</script>
